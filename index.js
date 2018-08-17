@@ -1,25 +1,43 @@
-let heldDisc = null;
-let isDiscPickedUp = false;
+const heldDisc = {
+    element: null,
+    size: undefined
+}
 
-function Test(event) {
-    if (event.target.id === "wrapper" || event.target.className === "disc") {
-        return;
-        // prevents wrapper and disc from being selected
-    }
-    // console.log(event.target);
-    // logs the id/class in console
-    const tower = event.target;
-
-    if (isDiscPickedUp === false) {
-        heldDisc = tower.lastElementChild;
-        tower.removeChild(tower.lastElementChild);
-        isDiscPickedUp = true;
-    } else if (isDiscPickedUp === true) {
-        tower.appendChild(heldDisc);
-        // console.log("is it working?")
-        // console.log(isDiscPickedUp)
-        isDiscPickedUp = false;
+function checkWinCondition() {
+    if (document.getElementById("towerThree").childElementCount === 4) {
+        const winMessage = document.createElement("h2")
+        winMessage.textContent = "YOU WON, FEARLESS LEADER! <(-.-)>"
+        document.body.appendChild(winMessage)
     }
 }
 
-document.getElementById("wrapper").onclick = Test;
+function holdDisc(tower) {
+    heldDisc.element = tower.lastElementChild;
+    heldDisc.size = heldDisc.element.offsetWidth;
+    tower.removeChild(tower.lastElementChild);
+}
+
+function dropDisc(tower) {
+        tower.appendChild(heldDisc.element);
+        heldDisc.size = heldDisc.element.offsetWidth;
+        heldDisc.element = null;
+}
+
+function eventClickHandler(event) {
+    if (!event.target.classList.contains("tower")) return;
+
+    const tower = event.target;
+    const topDisc = tower.lastElementChild;
+    const topDiscSize = topDisc && topDisc.offsetWidth;
+    const hasDisc = tower.lastElementChild;
+    const canStack = hasDisc && topDiscSize > heldDisc.size;
+
+    if (!heldDisc.element) {
+        holdDisc(tower);
+    } else if (!hasDisc || canStack) {
+        dropDisc(tower);
+    }
+    checkWinCondition();
+}
+
+document.getElementById("wrapper").onclick = eventClickHandler;
